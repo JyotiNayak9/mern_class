@@ -1,6 +1,6 @@
 require ("dotenv").config();
 const bcrypt = require("bcryptjs");
-const { randomStringGenerator } = require("../../utilities/helper");
+const { randomStringGenerator, deleteFile } = require("../../utilities/helper");
 const mailSvc = require("../../services/mail.service");
 const UserModel = require("./user.model");
 
@@ -52,8 +52,24 @@ class UserService{
             const user = new UserModel(data);
               return await user.save();
         }catch(exception){
+            if(data.image){
+                deleteFile("./public/uploads/user/"+data.image);
+            }
             throw(exception)
             // throw {status:400, detail: msg, message: "validation failed"}
+        }
+    }
+
+    getSingleUserByFilter = async(filter) =>{
+        try{
+           const UserDetail = await UserModel.findOne(filter);
+           if(UserDetail){
+            return UserDetail;
+           }else{
+            throw {status : 404, message: "User doesnot exist"}
+           }
+        }catch(exception){
+            throw exception
         }
     }
 }
