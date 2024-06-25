@@ -1,5 +1,6 @@
 const authRouter = require("express").Router();
 const loginCheck = require("../../middlewares/auth.middleware");
+const hasPermission = require("../../middlewares/rbac.middleware");
 const {setPath, uploadfile} = require("../../middlewares/uploader.middleware");
 const bodyValidator = require("../../middlewares/validator.middleware");
 const userCtrl = require("../user/user.controller");
@@ -13,6 +14,6 @@ authRouter.post("/register", setPath('user'),uploadfile().single('image'),bodyVa
 authRouter.get("/activate/:token",authController.activateUser)
 authRouter.get("/resend-activationToken/:token",authController.resendActivationToken)
 authRouter.post("/login", bodyValidator(LoginDTO), authController.login);
-authRouter.get("/me",loginCheck, authController.getloggedinUser);
+authRouter.get("/me",loginCheck,hasPermission(['admin']), authController.getloggedinUser);
 
 module.exports = authRouter;
