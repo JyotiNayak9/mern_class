@@ -7,25 +7,29 @@ const UserModel = require("./user.model");
 
 
 class UserService{
+
+generateUserActivationToken = (data) =>{
+    data.activationToken = randomStringGenerator(100)
+    data.activateFor = new Date(Date.now()+(process.env.TOKEN_ACTIVE_FOR*60*60*1000))      
+    return data; 
+}
     transformUserCreate = (req) =>{
-        const data = req.body;
+        let data = req.body;
 
             if(req.file){
                 data.image = req.file.filename
             }
             data.password = bcrypt.hashSync(data.password, 10)
-            
-            data.activationToken = randomStringGenerator(100)
-            data.status = "inactive"
-            data.activateFor = new Date(Date.now()+(4*60*60*1000))       //1970-1-1  00:00:00
+           data = this.generateUserActivationToken(data)
+           data.status = "inactive"
             return data;
     }
 
-    sendActivationEmail =  async ({name, email, token}) =>{
+    sendActivationEmail =  async ({name, email, token, sub = "Activate yoour account"}) =>{
         try{
             await mailSvc.sendEmail({
                 to: email,
-                sub: "Activate your account",
+                sub: sub ,
                 message : `
                 Dear ${name}, <br/>
                 <p>Your account has been registered successfully</p>
