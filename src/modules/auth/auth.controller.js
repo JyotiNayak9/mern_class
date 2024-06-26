@@ -80,6 +80,13 @@ class AuthController {
                     // }
                 );
 
+                const refreshToken = jwt.sign({
+                    sub: user._id,
+                    type: "refresh"
+                }, process.env.JWT_SECRET,{
+                    expiresIn: "1 day"
+                })
+
                 res.json({
                     result: {
                         UserDetail:{
@@ -88,7 +95,10 @@ class AuthController {
                             email: user.email,
                             role:user.role
                         },
-                        token: token
+                        token: {
+                            token,
+                            refreshToken
+                        }
                     },
                         message: "login successful",
                         meta: null
@@ -116,6 +126,44 @@ class AuthController {
             next(exception)
         }
     }
+
+    refreshToken = async(req, res, next) =>{
+        try{
+            let token = req.headers['authorization'] || null;
+        
+            if(!token){
+                throw {status: 401, message: "Token required"}
+            }
+                token = token.split(" ").pop()    
+                const {sub, type} = jwt.verify(token, process.env.JWT_SECRET)
+                if(!type || type !== "refresh"){
+                    throw{status: 401, messsage: "refresh token required"}
+                }
+            await userSvc.getSingleUserByFilter({
+                _id: sub
+            })
+            const accessToken = jwt.sign({
+                sub: sub,
+            }, process.env.JWT_SECRET,{
+            })
+            const refreshToken = jwt.sign({
+                sub: sub,
+                type: "refresh"
+            }, process.env.JWT_SECRET,{
+                expiresIn:"1 day"
+            })
+            res.json({
+                result:{
+                    token: accessToken,
+                    refreshToken: refreshToken
+                },
+                message: "Token refreshed",
+                meta: null
+            })
+        }catch(exception){
+            next(exception)
+        }
+}
 }
 
 module.exports = new AuthController()

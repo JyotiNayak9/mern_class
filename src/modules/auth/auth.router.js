@@ -14,6 +14,8 @@ authRouter.post("/register", setPath('user'),uploadfile().single('image'),bodyVa
 authRouter.get("/activate/:token",authController.activateUser)
 authRouter.get("/resend-activationToken/:token",authController.resendActivationToken)
 authRouter.post("/login", bodyValidator(LoginDTO), authController.login);
-authRouter.get("/me",loginCheck,hasPermission(['admin']), authController.getloggedinUser);
+authRouter.get("/me",loginCheck, authController.getloggedinUser);
+
+authRouter.get("/refresh", authController.refreshToken)
 
 module.exports = authRouter;

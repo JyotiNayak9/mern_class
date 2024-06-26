@@ -12,6 +12,9 @@ const loginCheck = async (req, res, next) => {
         token = token.split(" ").pop()
 
         const data = jwt.verify(token, process.env.JWT_SECRET)
+        if(Object.hasOwnProperty('type')){
+            throw {status:403, message : "access token required"}
+        }
         const user = await userSvc.getSingleUserByFilter({
             _id: data.sub
         })
