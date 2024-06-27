@@ -10,6 +10,9 @@ const { BrandCreateDTO, BrandUpdpateDTO } = require("./brand.request");
 
 brandRouter.get('/list-home', brandController.listForHome)
 
+// TODO: brand wise list product
+// router.get("/:slug/detail", brand)
+
 brandRouter.route('/')
     .post(loginCheck, hasPermission("admin"), setPath('brand'), uploadfile(fileFilterType.IMAGE).single("image"), bodyValidator(BrandCreateDTO),brandController.create)
     .get(loginCheck, hasPermission('admin'), brandController.index)
