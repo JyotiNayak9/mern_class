@@ -25,6 +25,39 @@ class BannerService{
             throw(exception)
         }
             }
+
+            getDetailByfilter = async(filter) =>{
+                try{
+                    const bannerDetail = await BannerModel.findOne(filter)
+                    .populate("createdBy", ["_id","name","email","role"])
+                        return bannerDetail;
+                }catch(exception){
+                    throw exception
+                }
+            }
+
+            updateBanner = async (data, id) =>{
+                try{
+                    const response = await BannerModel.findByIdAndUpdate(id, {$set: data}, {new:false})
+                    return response;
+                }catch(exception){
+                    throw exception
+                }
+            }
+
+            deleteById = async(id) =>{
+                try{
+                    const response = await BannerModel.findByIdAndDelete(id);
+                    if(!response){
+                        throw{status:404,message:"Banner not found"}
+
+                    }
+                    return response
+            
+                }catch(exception){
+                    throw exception
+                }
+            }
         }
 
 module.exports = new BannerService()

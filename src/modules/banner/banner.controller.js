@@ -3,6 +3,7 @@ const { deleteFile } = require("../../utilities/helper");
 const bannerService = require("./banner.service");
 
 class BannerController{
+    bannerDetail;
     create = async(req, res, next) =>{
         try{
             const data = req.body;
@@ -53,14 +54,71 @@ class BannerController{
             next(exception)
         }
     }
+    #validateId =async (id) => {
+       try {
+            if(!id){
+                throw {status:400, message:"Id is required"}
+            }
+            this.bannerDetail = await bannerService.getDetailByfilter({
+                _id:id
+            })
+            if(!this.bannerDetail){
+                throw{status:404, message:"Banner doesnot exists"}
+            }}catch(exception){
+                throw exception
+            }
+    }
     show = async(req, res, next) =>{
+        try{
+            const id = req.params.id;
+            await this.#validateId(id)
+            res.json({
+                result: this.bannerDetail,
+                maessage: "Banner Fetched successfully",
+                meta: null
+            })
+        }catch(exception){
+            next(exception)
+        }
         
     }
     update = async(req, res, next) =>{
-        
+        try{
+            const id = req.params.id;
+            await this.#validateId(id)
+
+            const data = req.body;
+            if(req.file){
+                data.image = await uploadImage("./public//banner/"+req.file.filename)
+                deleteFile("./public//banner/"+req.file.filename)
+            }
+
+            const response = await bannerService.updateBanner(data, id);
+            res.json({
+                result:response,
+                meta: null,
+                message: "Banner uodated successfully"
+            })
+        }catch(exception){
+            next(exception)
+        }
     }
     delete = async(req, res, next) =>{
-        
+        try{
+            const id = req.params.id;
+            await this.#validateId(id)
+
+            const response = await bannerService.deleteById(id)
+            //TODO: delete image from cloudinary
+
+            res.json({
+                result: response,
+                meta: null,
+                 message: "Banner deleted successfully"
+            })
+        }catch(exception){
+            next(exception)
+        }
     }
 }
 
